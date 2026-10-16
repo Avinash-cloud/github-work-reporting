@@ -28,47 +28,82 @@ def build():
     dist_dir = os.path.join(project_dir, "dist")
     build_dir = os.path.join(project_dir, "build")
 
-    # If GitHubWorkReporter.exe is currently running, terminate it so Windows doesn't lock the file
+    # If GitHubWorkReporter processes are currently running, terminate them so Windows doesn't lock files
     if sys.platform == "win32":
         try:
             subprocess.run(["taskkill", "/f", "/im", "GitHubWorkReporter.exe"], capture_output=True, check=False)
+            subprocess.run(["taskkill", "/f", "/im", "GitHubWorkReporter_Setup.exe"], capture_output=True, check=False)
         except Exception:
             pass
 
-    # Command arguments for PyInstaller
-    cmd = [
+    icon_file = os.path.join(project_dir, "app_icon.ico")
+    icon_arg = [f"--icon={icon_file}"] if os.path.isfile(icon_file) else []
+    icon_data = [f"--add-data={icon_file};."] if os.path.isfile(icon_file) else []
+
+    # -----------------------------------------------------------------------
+    # Step 1: Build the Main Application Executable (GitHubWorkReporter.exe)
+    # -----------------------------------------------------------------------
+    print("\n[1/2] Building Main Application Executable (GitHubWorkReporter.exe)...")
+    cmd_app = [
         sys.executable,
         "-m", "PyInstaller",
         "--name=GitHubWorkReporter",
         "--onefile",
         "--windowed",
+        *icon_arg,
+        *icon_data,
         "--collect-all", "customtkinter",
         "--clean",
         os.path.join(project_dir, "main.py")
     ]
 
-    print("\nRunning command:")
-    print(" ".join(cmd))
-    print("\nCompiling... (this may take 1-2 minutes)\n")
+    res_app = subprocess.run(cmd_app, cwd=project_dir, check=False)
+    if res_app.returncode != 0:
+        print("\n❌ PyInstaller build failed for main application with exit code:", res_app.returncode)
+        sys.exit(res_app.returncode)
 
-    res = subprocess.run(cmd, cwd=project_dir, check=False)
-    if res.returncode != 0:
-        print("\n❌ PyInstaller build failed with exit code:", res.returncode)
-        sys.exit(res.returncode)
-
-    output_exe = os.path.join(dist_dir, "GitHubWorkReporter.exe")
-    if os.path.isfile(output_exe):
-        size_mb = os.path.getsize(output_exe) / (1024 * 1024)
-        print("\n" + "=" * 70)
-        print("✔ BUILD SUCCEEDED!")
-        print(f"📦 Standalone Executable: {output_exe}")
-        print(f"⚖️  File Size:             {size_mb:.2f} MB")
-        print("=" * 70)
-        print("\nYou can now share 'GitHubWorkReporter.exe' with any Windows user!")
-        print("They do NOT need Python, Git, or anything installed to run it.\n")
-    else:
-        print(f"\n❌ Expected output executable not found at: {output_exe}")
+    app_exe = os.path.join(dist_dir, "GitHubWorkReporter.exe")
+    if not os.path.isfile(app_exe):
+        print(f"\n❌ Expected output executable not found at: {app_exe}")
         sys.exit(1)
+
+    app_size_mb = os.path.getsize(app_exe) / (1024 * 1024)
+    print(f"✔ Main executable built: {app_exe} ({app_size_mb:.2f} MB)")
+
+    # -----------------------------------------------------------------------
+    # Step 2: Build the Windows Setup Wizard (GitHubWorkReporter_Setup.exe)
+    # -----------------------------------------------------------------------
+    print("\n[2/2] Building Windows Installer Wizard (GitHubWorkReporter_Setup.exe)...")
+    cmd_setup = [
+        sys.executable,
+        "-m", "PyInstaller",
+        "--name=GitHubWorkReporter_Setup",
+        "--onefile",
+        "--windowed",
+        *icon_arg,
+        *icon_data,
+        f"--add-data={app_exe};.",
+        "--collect-all", "customtkinter",
+        os.path.join(project_dir, "setup_gui.py")
+    ]
+
+    res_setup = subprocess.run(cmd_setup, cwd=project_dir, check=False)
+    if res_setup.returncode != 0:
+        print("\n❌ PyInstaller build failed for setup installer with exit code:", res_setup.returncode)
+        sys.exit(res_setup.returncode)
+
+    setup_exe = os.path.join(dist_dir, "GitHubWorkReporter_Setup.exe")
+    setup_size_mb = os.path.getsize(setup_exe) / (1024 * 1024) if os.path.isfile(setup_exe) else 0
+
+    print("\n" + "=" * 70)
+    print("✔ ALL BUILDS SUCCEEDED!")
+    print(f"📦 1. Main Executable:   {app_exe} ({app_size_mb:.2f} MB)")
+    if os.path.isfile(setup_exe):
+        print(f"💿 2. Windows Installer: {setup_exe} ({setup_size_mb:.2f} MB)")
+    print("=" * 70)
+    print("\nShare with users:")
+    print("  • GitHubWorkReporter_Setup.exe -> One-click installer (creates Desktop & Start Menu icons)")
+    print("  • GitHubWorkReporter.exe       -> Standalone portable version\n")
 
 if __name__ == "__main__":
     build()

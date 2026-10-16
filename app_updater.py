@@ -194,11 +194,12 @@ echo Waiting for application to close...
 timeout /t 2 /nobreak >nul
 
 :RETRY_LOOP
-move /y "{new_exe_path}" "{current_exe}" >nul 2>&1
+copy /y "{new_exe_path}" "{current_exe}" >nul 2>&1
 if errorlevel 1 (
     timeout /t 1 /nobreak >nul
     goto RETRY_LOOP
 )
+del /f /q "{new_exe_path}" 2>nul
 
 echo Update applied successfully! Starting new version...
 start "" "{current_exe}"

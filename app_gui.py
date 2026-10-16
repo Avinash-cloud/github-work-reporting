@@ -1131,16 +1131,20 @@ class WorkReporterApp(ctk.CTk):
             )
             btn_update.pack(anchor="w", padx=20, pady=(0, 16))
         else:
+            warn_card = ctk.CTkFrame(self.update_display_card, fg_color="#334155", corner_radius=6)
+            warn_card.pack(fill="x", padx=20, pady=(0, 14))
             ctk.CTkLabel(
-                self.update_display_card,
-                text="Note: No standalone .exe asset found in the latest release. Visit GitHub to download manually.",
+                warn_card,
+                text=f"⚠️ Release {res.get('latest_version')} is published on GitHub, but no executable (.exe) file was uploaded to the release yet.\n\n"
+                     "When the .exe is attached to the GitHub release, 1-click update will automatically download and install it here.",
                 font=ctk.CTkFont(size=12),
-                text_color="#fbbf24"
-            ).pack(anchor="w", padx=20, pady=(0, 8))
+                text_color="#fbbf24",
+                justify="left"
+            ).pack(anchor="w", padx=16, pady=12)
 
             btn_web = ctk.CTkButton(
                 self.update_display_card,
-                text="Open Release Page on GitHub",
+                text="🌐 Open Release Page on GitHub",
                 command=lambda: webbrowser.open(res.get("html_url", ""))
             )
             btn_web.pack(anchor="w", padx=20, pady=(0, 16))
