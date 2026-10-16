@@ -273,6 +273,15 @@ class WorkReporterApp(ctk.CTk):
         self.last_generated_files: dict[str, str] = {}
         self.is_generating = False
 
+        # Set window icon if available
+        base_dir = getattr(sys, "_MEIPASS", os.path.dirname(os.path.abspath(__file__)))
+        icon_path = os.path.join(base_dir, "app_icon.ico")
+        if os.path.isfile(icon_path):
+            try:
+                self.iconbitmap(icon_path)
+            except Exception:
+                pass
+
         # Build UI Structure
         self._build_header()
         self._build_tabs()
@@ -282,6 +291,20 @@ class WorkReporterApp(ctk.CTk):
         if saved_token:
             self.token_entry.insert(0, saved_token)
             self.after(300, self.test_connection)
+
+        # Auto-create Desktop shortcut on first run if missing
+        if getattr(sys, "frozen", False):
+            self.after(1000, self._auto_create_shortcuts_on_first_run)
+
+    def _auto_create_shortcuts_on_first_run(self):
+        try:
+            import app_installer
+            user_profile = os.environ.get("USERPROFILE", os.path.expanduser("~"))
+            desktop_lnk = os.path.join(user_profile, "Desktop", f"{app_installer.APP_DISPLAY_NAME}.lnk")
+            if not os.path.isfile(desktop_lnk):
+                app_installer.setup_desktop_and_start_menu_shortcuts(sys.executable)
+        except Exception:
+            pass
 
     # -----------------------------------------------------------------------
     # Top Header
@@ -977,7 +1000,18 @@ class WorkReporterApp(ctk.CTk):
             hover_color="#1d4ed8",
             command=self.check_for_updates
         )
-        self.btn_check_update.pack(side="left", padx=(0, 14))
+        self.btn_check_update.pack(side="left", padx=(0, 10))
+
+        self.btn_shortcut = ctk.CTkButton(
+            action_row,
+            text="📌 Create Desktop Shortcut",
+            height=36,
+            font=ctk.CTkFont(size=13),
+            fg_color="#334155",
+            hover_color="#475569",
+            command=self.create_desktop_shortcut
+        )
+        self.btn_shortcut.pack(side="left", padx=(0, 14))
 
         self.lbl_update_spinner = ctk.CTkLabel(
             action_row,
@@ -998,6 +1032,19 @@ class WorkReporterApp(ctk.CTk):
             text_color="#64748b"
         )
         self.lbl_update_status.pack(pady=40)
+
+    def create_desktop_shortcut(self):
+        try:
+            import app_installer
+            is_frozen = getattr(sys, "frozen", False)
+            target = sys.executable if is_frozen else app_installer.get_installed_exe_path()
+            res = app_installer.setup_desktop_and_start_menu_shortcuts(target)
+            if res.get("desktop") or res.get("start_menu"):
+                messagebox.showinfo("Desktop Shortcut", "✔ Desktop & Start Menu shortcuts created successfully!\nYou can now open the app directly from your Desktop or Windows Start Menu.")
+            else:
+                messagebox.showwarning("Desktop Shortcut", "Could not create Desktop shortcut automatically.")
+        except Exception as e:
+            messagebox.showerror("Shortcut Error", str(e))
 
     def check_for_updates(self):
         self.btn_check_update.configure(state="disabled", text="Checking for updates...")
