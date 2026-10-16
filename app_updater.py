@@ -190,6 +190,8 @@ class UpdateManager:
         # Windows batch script: waits for current app to exit, overwrites exe, and relaunches
         batch_script_content = f"""@echo off
 setlocal
+set _MEIPASS2=
+set _MEIPASS=
 echo Waiting for application to close...
 timeout /t 2 /nobreak >nul
 
@@ -210,10 +212,14 @@ exit
         with open(batch_script_path, "w", encoding="utf-8") as f:
             f.write(batch_script_content)
 
-        # Launch the batch script detached from this process
+        # Launch the batch script detached from this process with clean environment
+        clean_env = os.environ.copy()
+        clean_env.pop("_MEIPASS2", None)
+        clean_env.pop("_MEIPASS", None)
         CREATE_NO_WINDOW = 0x08000000
         subprocess.Popen(
             ["cmd.exe", "/c", batch_script_path],
+            env=clean_env,
             creationflags=CREATE_NO_WINDOW,
             close_fds=True
         )

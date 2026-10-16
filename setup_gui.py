@@ -266,7 +266,24 @@ class SetupWizardApp(ctk.CTk):
         should_launch = bool(self.cb_launch.get())
         if should_launch and os.path.isfile(target_exe):
             try:
-                subprocess.Popen([target_exe], close_fds=True)
+                # Remove PyInstaller parent temp directory from environment
+                # so the child executable runs in its own independent runtime
+                clean_env = os.environ.copy()
+                clean_env.pop("_MEIPASS2", None)
+                clean_env.pop("_MEIPASS", None)
+                os.environ.pop("_MEIPASS2", None)
+                os.environ.pop("_MEIPASS", None)
+
+                if hasattr(os, "startfile"):
+                    os.startfile(target_exe)
+                else:
+                    subprocess.Popen(
+                        [target_exe],
+                        cwd=os.path.dirname(target_exe),
+                        env=clean_env,
+                        close_fds=True,
+                        creationflags=getattr(subprocess, "DETACHED_PROCESS", 0x00000008)
+                    )
             except Exception:
                 pass
 
