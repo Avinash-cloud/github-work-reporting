@@ -9,16 +9,19 @@ Available both as a **standalone Windows Desktop GUI Application (`.exe`)** and 
 ## 🖥️ Standalone Windows Desktop App (`.exe`)
 
 You can share the compiled single executable with any Windows user:
+
 - **Location:** [`dist/GitHubWorkReporter.exe`](dist/GitHubWorkReporter.exe)
 - **Zero Requirements:** End-users do **NOT** need Python, Git, or pip installed.
 - **Double-Click & Run:** No installation wizard required.
 
 ### 🌟 Desktop App Features:
+
 1. **🔐 GitHub Connection Tab:** Enter your Personal Access Token, test connection, view token scopes, remaining API limits, and user profile card.
-2. **📊 Reporting Tab:** Date range picker with quick presets (*Today, Yesterday, Last 7 Days, This Week, Last 14 Days, Last 30 Days, This Month*), repository filters, and one-click buttons to open **PDF**, **HTML Dashboard**, **Plain Text Doc**, and **Markdown**.
-3. **🔄 Version & Auto-Update Tab:** Shows current version (`v1.0.0`), queries the public GitHub repository releases, displays new release notes, and downloads & self-updates the executable automatically!
+2. **📊 Reporting Tab:** Date range picker with quick presets (_Today, Yesterday, Last 7 Days, This Week, Last 14 Days, Last 30 Days, This Month_), repository filters, and one-click buttons to open **PDF**, **HTML Dashboard**, **Plain Text Doc**, and **Markdown**.
+3. **🔄 Version & Auto-Update Tab:** Shows current version (`v1.1.0`), queries the public GitHub repository releases, displays new release notes, and downloads & self-updates the executable automatically!
 
 To rebuild the executable at any time:
+
 ```bash
 python build_exe.py
 ```
@@ -26,7 +29,6 @@ python build_exe.py
 ---
 
 ## 🚀 Features
-
 
 - **Human-Readable Executive Reporting:** Automatically transforms raw git commits into clean business actions organized into functional domains (Security & Access Control, External Integrations, UI/UX Dashboards, APIs & Backend, Features, Bug Fixes).
 - **QA & Test Verification Checklist:** Automatically generates an actionable test & QA verification checklist ("What to Test") from the code updates.
@@ -58,24 +60,28 @@ To scan **private repositories** and avoid GitHub's unauthenticated rate limits 
    ```env
    GITHUB_TOKEN=ghp_yourPersonalAccessTokenHere
    ```
-   *(Or you can simply enter your token when prompted interactively, and the script can save it for you).*
+   _(Or you can simply enter your token when prompted interactively, and the script can save it for you)._
 
 ---
 
 ## 💻 Usage Examples
 
 ### 1. Interactive Mode
+
 Simply run the script. It will guide you with helpful defaults and generate **Markdown, HTML, PDF, and Text Doc** reports:
+
 ```bash
 python reportingscript.py
 ```
 
 ### 2. Specific Date Range
+
 ```bash
 python reportingscript.py --start 2026-10-01 --end 2026-10-15
 ```
 
 ### 3. Quick Relative Keywords
+
 ```bash
 # Past 7 days
 python reportingscript.py --start 7d --end today
@@ -88,16 +94,19 @@ python reportingscript.py --start 30d
 ```
 
 ### 4. Generate All Formats (Markdown, HTML, PDF, Text Doc, JSON)
+
 ```bash
 python reportingscript.py --start 14d --all-formats
 ```
 
 ### 5. Clean Feature Commits with Detailed Diff Stats (+ / - lines)
+
 ```bash
 python reportingscript.py --start 7d --stats --skip-merges
 ```
 
 ### 6. Filter Specific Repositories
+
 ```bash
 python reportingscript.py --start 7d --repo rdgboos --repo start_tag
 ```
@@ -106,22 +115,21 @@ python reportingscript.py --start 7d --repo rdgboos --repo start_tag
 
 ## ⚙️ Command-Line Arguments Reference
 
-| Argument | Description | Default |
-| :--- | :--- | :--- |
-| `-s`, `--start` | Start date (`YYYY-MM-DD`, `today`, `yesterday`, `7d`, `14d`, `30d`, `this-week`, `this-month`) | 7 days ago |
-| `-e`, `--end` | End date (`YYYY-MM-DD`, `today`, etc.) | Today |
-| `-t`, `--token` | GitHub Personal Access Token | `GITHUB_TOKEN` from `.env` |
-| `-a`, `--author` | Target author username or email | Authenticated user / git config |
-| `--pdf` / `--no-pdf` | Generate publication-ready PDF report (auto-detected if Edge/Chrome available) | `Auto` |
-| `--html` / `--no-html` | Generate styled, interactive HTML report with 1-click Print/PDF | `True` |
-| `--doc`, `--txt` / `--no-doc` | Generate plain-text test / executive document (`.txt`) | `True` |
-| `--all-formats` | Generate all formats (Markdown, HTML, PDF, Text doc, and JSON) | `False` |
-| `--skip-merges` | Exclude branch merge commits from the report | `False` |
-| `--stats` | Fetch lines added/deleted and files touched per commit | `False` |
-| `--json` | Also export the report as a `.json` file | `False` |
-| `-r`, `--repo` | Filter specific repo name (can be repeated) | All repos |
-| `--exclude` | Exclude specific repo name (can be repeated) | None |
-| `--visibility` | Repo visibility filter: `all`, `public`, `private` | `all` |
-| `--order` | Sort days chronologically: `asc` or `desc` | `asc` |
-| `-o`, `--output` | Custom destination base path for reports | `reports/github_work_report_...` |
-
+| Argument                      | Description                                                                                    | Default                          |
+| :---------------------------- | :--------------------------------------------------------------------------------------------- | :------------------------------- |
+| `-s`, `--start`               | Start date (`YYYY-MM-DD`, `today`, `yesterday`, `7d`, `14d`, `30d`, `this-week`, `this-month`) | 7 days ago                       |
+| `-e`, `--end`                 | End date (`YYYY-MM-DD`, `today`, etc.)                                                         | Today                            |
+| `-t`, `--token`               | GitHub Personal Access Token                                                                   | `GITHUB_TOKEN` from `.env`       |
+| `-a`, `--author`              | Target author username or email                                                                | Authenticated user / git config  |
+| `--pdf` / `--no-pdf`          | Generate publication-ready PDF report (auto-detected if Edge/Chrome available)                 | `Auto`                           |
+| `--html` / `--no-html`        | Generate styled, interactive HTML report with 1-click Print/PDF                                | `True`                           |
+| `--doc`, `--txt` / `--no-doc` | Generate plain-text test / executive document (`.txt`)                                         | `True`                           |
+| `--all-formats`               | Generate all formats (Markdown, HTML, PDF, Text doc, and JSON)                                 | `False`                          |
+| `--skip-merges`               | Exclude branch merge commits from the report                                                   | `False`                          |
+| `--stats`                     | Fetch lines added/deleted and files touched per commit                                         | `False`                          |
+| `--json`                      | Also export the report as a `.json` file                                                       | `False`                          |
+| `-r`, `--repo`                | Filter specific repo name (can be repeated)                                                    | All repos                        |
+| `--exclude`                   | Exclude specific repo name (can be repeated)                                                   | None                             |
+| `--visibility`                | Repo visibility filter: `all`, `public`, `private`                                             | `all`                            |
+| `--order`                     | Sort days chronologically: `asc` or `desc`                                                     | `asc`                            |
+| `-o`, `--output`              | Custom destination base path for reports                                                       | `reports/github_work_report_...` |

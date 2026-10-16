@@ -10,8 +10,8 @@ import json
 from typing import Any, Dict
 
 APP_NAME = "GitHubWorkReporter"
-DEFAULT_GITHUB_REPO = "Avinash-cloud/github-work-reporter"
-APP_VERSION = "1.0.1"
+DEFAULT_GITHUB_REPO = "Avinash-cloud/github-work-reporting"
+APP_VERSION = "1.1.0"
 
 
 def get_app_data_dir() -> str:
