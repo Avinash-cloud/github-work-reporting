@@ -1,0 +1,839 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Work Progress & Verification Report (Oct 09, 2026 to Oct 16, 2026)</title>
+  <style>
+    :root {
+      --primary: #2563eb;
+      --primary-dark: #1d4ed8;
+      --slate-900: #0f172a;
+      --slate-800: #1e293b;
+      --slate-700: #334155;
+      --slate-600: #475569;
+      --slate-500: #64748b;
+      --slate-200: #e2e8f0;
+      --slate-100: #f1f5f9;
+      --slate-50: #f8fafc;
+      --green-600: #059669;
+      --indigo-600: #4f46e5;
+      --amber-600: #d97706;
+      --sky-600: #0284c7;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: var(--slate-50);
+      color: var(--slate-900);
+      line-height: 1.5;
+      padding: 24px;
+      -webkit-font-smoothing: antialiased;
+    }
+    .container {
+      max-width: 1040px;
+      margin: 0 auto;
+    }
+    .top-bar {
+      display: flex;
+      justify-content: flex-end;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 16px;
+      font-size: 14px;
+      font-weight: 600;
+      border-radius: 6px;
+      border: 1px solid var(--slate-200);
+      background: white;
+      color: var(--slate-700);
+      cursor: pointer;
+      box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+      transition: all 0.15s ease;
+    }
+    .btn:hover {
+      background: var(--slate-100);
+      color: var(--slate-900);
+    }
+    .btn-primary {
+      background: var(--primary);
+      border-color: var(--primary-dark);
+      color: white;
+    }
+    .btn-primary:hover {
+      background: var(--primary-dark);
+    }
+    .header-card {
+      background: linear-gradient(135deg, var(--slate-900) 0%, var(--slate-800) 100%);
+      color: white;
+      border-radius: 12px;
+      padding: 28px 32px;
+      margin-bottom: 24px;
+      box-shadow: 0 4px 12px rgba(15, 23, 42, 0.15);
+    }
+    .header-title {
+      font-size: 26px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin-bottom: 8px;
+    }
+    .header-sub {
+      font-size: 14.5px;
+      color: #94a3b8;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 18px;
+      align-items: center;
+    }
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 14px;
+      margin-bottom: 24px;
+    }
+    .stat-card {
+      background: white;
+      border: 1px solid var(--slate-200);
+      border-radius: 10px;
+      padding: 16px 20px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+    }
+    .stat-label {
+      font-size: 12.5px;
+      color: var(--slate-500);
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      margin-bottom: 4px;
+    }
+    .stat-val {
+      font-size: 26px;
+      font-weight: 700;
+      color: var(--slate-900);
+      letter-spacing: -0.02em;
+    }
+    .card {
+      background: white;
+      border: 1px solid var(--slate-200);
+      border-radius: 10px;
+      padding: 22px 26px;
+      margin-bottom: 24px;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+    }
+    .card-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: var(--slate-900);
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      border-bottom: 1px solid var(--slate-100);
+      padding-bottom: 10px;
+    }
+    .highlight-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .highlight-item {
+      position: relative;
+      padding-left: 20px;
+      font-size: 14.5px;
+      color: var(--slate-700);
+    }
+    .highlight-item::before {
+      content: "•";
+      position: absolute;
+      left: 4px;
+      color: var(--primary);
+      font-size: 22px;
+      line-height: 1;
+      top: -2px;
+    }
+    .cat-group {
+      margin-bottom: 20px;
+    }
+    .cat-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+      padding-bottom: 6px;
+      border-bottom: 1px solid var(--slate-200);
+    }
+    .cat-header-title {
+      font-size: 15px;
+      font-weight: 700;
+      color: var(--slate-800);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .cat-count {
+      font-size: 12px;
+      background: var(--slate-100);
+      color: var(--slate-600);
+      padding: 2px 8px;
+      border-radius: 9999px;
+      font-weight: 600;
+    }
+    .change-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .change-item {
+      font-size: 14px;
+      color: var(--slate-800);
+      display: flex;
+      align-items: baseline;
+      gap: 8px;
+      padding: 8px 12px;
+      border-radius: 6px;
+      background: var(--slate-50);
+      border: 1px solid rgba(226, 232, 240, 0.8);
+    }
+    .repo-pill {
+      font-size: 11.5px;
+      font-weight: 600;
+      color: #1e40af;
+      background: #dbeafe;
+      padding: 2px 8px;
+      border-radius: 4px;
+      white-space: nowrap;
+      text-decoration: none;
+    }
+    .commit-link {
+      margin-left: auto;
+      font-size: 11px;
+      color: var(--slate-500);
+      text-decoration: none;
+      font-family: monospace;
+      padding: 2px 6px;
+      background: white;
+      border: 1px solid var(--slate-200);
+      border-radius: 4px;
+      white-space: nowrap;
+    }
+    .commit-link:hover {
+      color: var(--primary);
+      border-color: var(--primary);
+    }
+    .qa-list {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .qa-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      font-size: 14px;
+      color: var(--slate-800);
+      background: #fbfcfd;
+      padding: 9px 12px;
+      border-radius: 6px;
+      border: 1px solid var(--slate-200);
+    }
+    .qa-checkbox {
+      margin-top: 3px;
+      cursor: pointer;
+    }
+    .table-container {
+      overflow-x: auto;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13.5px;
+    }
+    th {
+      text-align: left;
+      padding: 10px 12px;
+      background: var(--slate-100);
+      color: var(--slate-700);
+      font-weight: 600;
+      border-bottom: 2px solid var(--slate-200);
+    }
+    td {
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--slate-100);
+      color: var(--slate-800);
+    }
+    tr:hover td {
+      background: var(--slate-50);
+    }
+    details {
+      background: white;
+      border: 1px solid var(--slate-200);
+      border-radius: 8px;
+      padding: 12px 16px;
+      margin-bottom: 10px;
+    }
+    details summary {
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 14px;
+      color: var(--slate-700);
+    }
+    .details-content {
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px solid var(--slate-100);
+      font-size: 13px;
+    }
+    @media print {
+      @page {
+        margin: 12mm 10mm;
+        size: A4 portrait;
+      }
+      body {
+        background: white !important;
+        padding: 0 !important;
+        font-size: 10pt !important;
+        color: #000 !important;
+      }
+      .no-print {
+        display: none !important;
+      }
+      .container {
+        max-width: 100% !important;
+      }
+      .header-card {
+        background: #0f172a !important;
+        color: white !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+        box-shadow: none !important;
+        padding: 18px 20px !important;
+        margin-bottom: 14px !important;
+      }
+      .card, .stat-card {
+        box-shadow: none !important;
+        border: 1px solid #cbd5e1 !important;
+        break-inside: avoid;
+        page-break-inside: avoid;
+        margin-bottom: 14px !important;
+        padding: 14px 18px !important;
+      }
+      .change-item, .qa-item {
+        background: #f8fafc !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="top-bar no-print">
+      <button onclick="window.print()" class="btn btn-primary">🖨️ Print / Save as PDF</button>
+    </div>
+
+    <!-- Header Card -->
+    <div class="header-card">
+      <h1 class="header-title">📊 Work Progress & Release Verification Report</h1>
+      <div class="header-sub">
+        <span>📅 <strong>Period:</strong> Oct 09, 2026 &mdash; Oct 16, 2026</span>
+        <span>👤 <strong>Author:</strong> Avinash-cloud</span>
+        <span>⏱️ <strong>Generated:</strong> 2026-10-16 11:58:50</span>
+      </div>
+    </div>
+
+    <!-- KPI Stats -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-label">Total Deliverables</div>
+        <div class="stat-val">25</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Active Repositories</div>
+        <div class="stat-val">7</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Security & Access</div>
+        <div class="stat-val" style="color: var(--indigo-600)">5</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Features & UI Dashboards</div>
+        <div class="stat-val" style="color: var(--sky-600)">8</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">External Integrations</div>
+        <div class="stat-val" style="color: var(--amber-600)">6</div>
+      </div>
+    </div>
+
+    <!-- Executive Highlights -->
+    <div class="card">
+      <h2 class="card-title">🎯 Executive Summary & Milestones</h2>
+      <ul class="highlight-list">
+
+        <li class="highlight-item">Security &amp; Governance: Hardened system security with Role-Based Access Control (RBAC), IP Whitelisting, NextAuth authentication across core services.</li>
+        <li class="highlight-item">External Integrations: Integrated Meta Graph API (Social Media Optimization), Automated Email Workers for automated workflows and data synchronization.</li>
+        <li class="highlight-item">Frontend &amp; Dashboards: Built interactive product demo pages, item-wise financial statement reports, role-aware admin navigation.</li>
+        <li class="highlight-item">Delivery Velocity: Successfully completed 25 updates across 7 repositories.</li>
+      </ul>
+    </div>
+
+    <!-- What Changed & What Was Updated -->
+    <div class="card">
+      <h2 class="card-title">🚀 What Changed & What Was Updated</h2>
+
+
+      <div class="cat-group">
+        <div class="cat-header">
+          <span class="cat-header-title">🛡️ Security &amp; Access Control</span>
+          <span class="cat-count">5 updates</span>
+        </div>
+        <ul class="change-list">
+          <li class="change-item">
+            <span class="repo-pill">rdgboos</span>
+            <span>Add Google Sheet integration, IP whitelist login security, and user management features</span>
+            <a href="https://github.com/Avinash-cloud/rdgboos/commit/0a37349591948a1ab30aea0d7b7e4baa7a507c5f" target="_blank" class="commit-link" title="Open commit on GitHub">0a37349</a>
+          </li>
+          <li class="change-item">
+            <span class="repo-pill">rdgboos</span>
+            <span>Add lead management API routes, UI components, and RBAC utilities</span>
+            <a href="https://github.com/Avinash-cloud/rdgboos/commit/a47ca1b2a8c49377d39b3b395b1ab4dcf50810ae" target="_blank" class="commit-link" title="Open commit on GitHub">a47ca1b</a>
+          </li>
+          <li class="change-item">
+            <span class="repo-pill">rdgboos</span>
+            <span>Implement department-based RBAC scoping, audit logging, and related API routes</span>
+            <a href="https://github.com/Avinash-cloud/rdgboos/commit/3a119375aa05015c977409968eb87b20ea7e308f" target="_blank" class="commit-link" title="Open commit on GitHub">3a11937</a>
+          </li>
+          <li class="change-item">
+            <span class="repo-pill">rdgboos</span>
+            <span>Add Meta portfolio integration, RBAC, and marketing management endpoints</span>
+            <a href="https://github.com/Avinash-cloud/rdgboos/commit/33bb29f56d78bc74ed188ff7c3f9837a5ac217b0" target="_blank" class="commit-link" title="Open commit on GitHub">33bb29f</a>
+          </li>
+          <li class="change-item">
+            <span class="repo-pill">rdgboos</span>
+            <span>Implement user management APIs, RBAC system, and NextAuth configuration</span>
+            <a href="https://github.com/Avinash-cloud/rdgboos/commit/9224ce810c545e60159c0c4ff2e0e6ea3791b202" target="_blank" class="commit-link" title="Open commit on GitHub">9224ce8</a>
+          </li>
+        </ul>
+      </div>
+
+      <div class="cat-group">
+        <div class="cat-header">
+          <span class="cat-header-title">🔌 External Integrations &amp; Services</span>
+          <span class="cat-count">6 updates</span>
+        </div>
+        <ul class="change-list">
+          <li class="change-item">
+            <span class="repo-pill">rdgboos</span>
+            <span>Implement lead management features including bulk operations, Meta integration, and lead table UI</span>
+            <a href="https://github.com/Avinash-cloud/rdgboos/commit/613c70acdda57d586d1dea7a2c035d825e38c54e" target="_blank" class="commit-link" title="Open commit on GitHub">613c70a</a>
+          </li>
+          <li class="change-item">
+            <span class="repo-pill">rdgboos</span>
+            <span>Add Meta Graph API integration service, database models, and dashboard routes for social media management</span>
+            <a href="https://github.com/Avinash-cloud/rdgboos/commit/db9b258d208f12993d96b0b0003ec26ab68b0417" target="_blank" class="commit-link" title="Open commit on GitHub">db9b258</a>
+          </li>
+          <li class="change-item">
+            <span class="repo-pill">rdgboos</span>
+            <span>Add social media optimization (SMO) module with scheduling, analytics, and role management</span>
+            <a href="https://github.com/Avinash-cloud/rdgboos/commit/c65ff593ac63da2a472ab1379bfb3642b54d8484" target="_blank" class="commit-link" title="Open commit on GitHub">c65ff59</a>
+          </li>
+          <li class="change-item">
+            <span class="repo-pill">rdgboos</span>
+            <span>Add dashboard views, components, and API integration for contacts, departments, and leads</span>
+            <a href="https://github.com/Avinash-cloud/rdgboos/commit/dd455e2a9e4548d377771563a2b1566040cceac0" target="_blank" class="commit-link" title="Open commit on GitHub">dd455e2</a>
+          </li>
+          <li class="change-item">
+            <span class="repo-pill">start_tag</span>
+            <span>Add interactive live demo page, reviews system, email worker, and product components</span>
+            <a href="https://github.com/Avinash-cloud/start_tag/commit/01583d8f239f7eb5bd7007bcd11d5d6dc031c498" target="_blank" class="commit-link" title="Open commit on GitHub">01583d8</a>
+          </li>
+          <li class="change-item">
+            <span class="repo-pill">bla-tech-ui</span>
+            <span>Add distributor pages, map integration, and application management API</span>
+            <a href="https://github.com/Avinash-cloud/bla-tech-ui/commit/dd7a3d651ed1dc854788c76b6251271ee40aa2a8" target="_blank" class="commit-link" title="Open commit on GitHub">dd7a3d6</a>
+          </li>
+        </ul>
+      </div>
+
+      <div class="cat-group">
+        <div class="cat-header">
+          <span class="cat-header-title">🎨 UI / UX &amp; Frontend Dashboards</span>
+          <span class="cat-count">8 updates</span>
+        </div>
+        <ul class="change-list">
+          <li class="change-item">
+            <span class="repo-pill">SGEPC_ADMIN_UI</span>
+            <span>Add master summary report page and api route with mongodb support</span>
+            <a href="https://github.com/Avinash-cloud/SGEPC_ADMIN_UI/commit/c645b78a7957a25816d552d9738c88aee0dc6987" target="_blank" class="commit-link" title="Open commit on GitHub">c645b78</a>
+          </li>
+          <li class="change-item">
+            <span class="repo-pill">SGEPC_ADMIN_UI</span>
+            <span>Add item-wise statement report page with filters and server aggregation</span>
+            <a href="https://github.com/Avinash-cloud/SGEPC_ADMIN_UI/commit/9b0b84108558a60421fe0c39f83955154856dd9d" target="_blank" class="commit-link" title="Open commit on GitHub">9b0b841</a>
+          </li>
+          <li class="change-item">
+            <span class="repo-pill">SGEPC_ADMIN_UI</span>
+            <span>Add master summary reporting API route and frontend page</span>
+            <a href="https://github.com/Avinash-cloud/SGEPC_ADMIN_UI/commit/e0df580bc32e0d9016fc6e911099299b445892a9" target="_blank" class="commit-link" title="Open commit on GitHub">e0df580</a>
+          </li>
+          <li class="change-item">
+            <span class="repo-pill">rdg-next</span>
+            <span>Add AdminSidebar component with role-based navigation and live badge counters</span>
+            <a href="https://github.com/Avinash-cloud/rdg-next/commit/b9717ad3c2ca9e8d1f654b359d713bed1c7c7ab9" target="_blank" class="commit-link" title="Open commit on GitHub">b9717ad</a>
+          </li>
+          <li class="change-item">
+            <span class="repo-pill">rdg-next</span>
+            <span>Add contact form component and thank you page implementation</span>
+            <a href="https://github.com/Avinash-cloud/rdg-next/commit/ad560e55ff0ef982754a6532230248f640b6d06b" target="_blank" class="commit-link" title="Open commit on GitHub">ad560e5</a>
+          </li>
+          <li class="change-item">
+            <span class="repo-pill">rdg-next</span>
+            <span>Create admin leads page with management and filtering capabilities</span>
+            <a href="https://github.com/Avinash-cloud/rdg-next/commit/e9f84b06ab38ddb243e92f02685d353a3ec4167f" target="_blank" class="commit-link" title="Open commit on GitHub">e9f84b0</a>
+          </li>
+          <li class="change-item">
+            <span class="repo-pill">rdg-next</span>
+            <span>Implement admin dashboard and backend API routes for managing leads, applications, and statuses</span>
+            <a href="https://github.com/Avinash-cloud/rdg-next/commit/44a37e1c615972fd15f6db3f3ff36a542869804b" target="_blank" class="commit-link" title="Open commit on GitHub">44a37e1</a>
+          </li>
+          <li class="change-item">
+            <span class="repo-pill">start_tag</span>
+            <span>Add StarTagProduct component with interactive multi-pet configuration and media gallery</span>
+            <a href="https://github.com/Avinash-cloud/start_tag/commit/fcb45447832296835ec6b99d9f43ced1508db8a0" target="_blank" class="commit-link" title="Open commit on GitHub">fcb4544</a>
+          </li>
+        </ul>
+      </div>
+
+      <div class="cat-group">
+        <div class="cat-header">
+          <span class="cat-header-title">⚙️ Backend &amp; API Architecture</span>
+          <span class="cat-count">1 update</span>
+        </div>
+        <ul class="change-list">
+          <li class="change-item">
+            <span class="repo-pill">Server_SGEPC</span>
+            <span>Initialize initial models, services, repositories, and controllers for admin backend</span>
+            <a href="https://github.com/Avinash-cloud/Server_SGEPC/commit/7dcced9431eb45c965c21bb50a0c7a2a4730ddd8" target="_blank" class="commit-link" title="Open commit on GitHub">7dcced9</a>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- QA & Test Verification Checklist -->
+    <div class="card">
+      <h2 class="card-title">🧪 QA & Test Verification Checklist (What to Test)</h2>
+      <ul class="qa-list">
+
+        <li class="qa-item">
+          <input type="checkbox" class="qa-checkbox">
+          <span>Verify financial statement and summary report pages in [SGEPC_ADMIN_UI]: test date filters and server aggregation accuracy.</span>
+        </li>
+        <li class="qa-item">
+          <input type="checkbox" class="qa-checkbox">
+          <span>Test contact/lead submission form in [rdgboos]: test validation errors, successful submit, and thank you page redirect.</span>
+        </li>
+        <li class="qa-item">
+          <input type="checkbox" class="qa-checkbox">
+          <span>Test IP Whitelist login protection in [rdgboos]: confirm authorized IPs log in successfully and unauthorized IPs receive 403 Forbidden.</span>
+        </li>
+        <li class="qa-item">
+          <input type="checkbox" class="qa-checkbox">
+          <span>Test Google Sheets automated sync in [rdgboos]: verify data rows synchronize accurately upon form or lead submission.</span>
+        </li>
+        <li class="qa-item">
+          <input type="checkbox" class="qa-checkbox">
+          <span>Verify Role-Based Access Control (RBAC): test user roles and department boundaries in [rdgboos] to ensure restricted actions are blocked.</span>
+        </li>
+        <li class="qa-item">
+          <input type="checkbox" class="qa-checkbox">
+          <span>Test Meta Graph API integration in [rdgboos]: verify social media scheduling, token refresh, and analytics metrics.</span>
+        </li>
+        <li class="qa-item">
+          <input type="checkbox" class="qa-checkbox">
+          <span>Verify NextAuth authentication flow in [rdgboos]: test session creation, token persistence, and logout behavior.</span>
+        </li>
+        <li class="qa-item">
+          <input type="checkbox" class="qa-checkbox">
+          <span>Verify Role-Based Access Control (RBAC): test user roles and department boundaries in [rdg-next] to ensure restricted actions are blocked.</span>
+        </li>
+        <li class="qa-item">
+          <input type="checkbox" class="qa-checkbox">
+          <span>Validate AdminSidebar in [rdg-next]: verify role-based navigation links and live counter badges.</span>
+        </li>
+        <li class="qa-item">
+          <input type="checkbox" class="qa-checkbox">
+          <span>Test contact/lead submission form in [rdg-next]: test validation errors, successful submit, and thank you page redirect.</span>
+        </li>
+        <li class="qa-item">
+          <input type="checkbox" class="qa-checkbox">
+          <span>Verify interactive demo page in [start_tag]: test multi-pet configuration switching and media gallery responsiveness.</span>
+        </li>
+        <li class="qa-item">
+          <input type="checkbox" class="qa-checkbox">
+          <span>Test background email worker in [start_tag]: ensure confirmation and notification emails are dispatched reliably.</span>
+        </li>
+        <li class="qa-item">
+          <input type="checkbox" class="qa-checkbox">
+          <span>Test distributor locator page in [bla-tech-ui]: verify interactive map rendering and application management API.</span>
+        </li>
+      </ul>
+    </div>
+
+    <!-- Repositories Overview -->
+    <div class="card">
+      <h2 class="card-title">📦 Active Repositories Overview</h2>
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Repository</th>
+              <th>Total Updates</th>
+              <th>Link</th>
+            </tr>
+          </thead>
+          <tbody>
+
+            <tr>
+              <td><strong>Avinash-cloud/rdgboos</strong></td>
+              <td>12 updates</td>
+              <td><a href="https://github.com/Avinash-cloud/rdgboos" target="_blank" class="repo-pill">Open GitHub</a></td>
+            </tr>
+            <tr>
+              <td><strong>Avinash-cloud/rdg-next</strong></td>
+              <td>4 updates</td>
+              <td><a href="https://github.com/Avinash-cloud/rdg-next" target="_blank" class="repo-pill">Open GitHub</a></td>
+            </tr>
+            <tr>
+              <td><strong>Avinash-cloud/SGEPC_ADMIN_UI</strong></td>
+              <td>3 updates</td>
+              <td><a href="https://github.com/Avinash-cloud/SGEPC_ADMIN_UI" target="_blank" class="repo-pill">Open GitHub</a></td>
+            </tr>
+            <tr>
+              <td><strong>Avinash-cloud/start_tag</strong></td>
+              <td>2 updates</td>
+              <td><a href="https://github.com/Avinash-cloud/start_tag" target="_blank" class="repo-pill">Open GitHub</a></td>
+            </tr>
+            <tr>
+              <td><strong>Avinash-cloud/Server_SGEPC</strong></td>
+              <td>2 updates</td>
+              <td><a href="https://github.com/Avinash-cloud/Server_SGEPC" target="_blank" class="repo-pill">Open GitHub</a></td>
+            </tr>
+            <tr>
+              <td><strong>Avinash-cloud/hanlays_admin</strong></td>
+              <td>1 updates</td>
+              <td><a href="https://github.com/Avinash-cloud/hanlays_admin" target="_blank" class="repo-pill">Open GitHub</a></td>
+            </tr>
+            <tr>
+              <td><strong>Avinash-cloud/bla-tech-ui</strong></td>
+              <td>1 updates</td>
+              <td><a href="https://github.com/Avinash-cloud/bla-tech-ui" target="_blank" class="repo-pill">Open GitHub</a></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- Chronological Work Log (Reference) -->
+    <div class="card no-print">
+      <h2 class="card-title">🗓️ Chronological Activity Log (Audit Reference)</h2>
+
+      <details>
+        <summary>📅 2026-10-09 (Friday) &mdash; 3 updates</summary>
+        <div class="details-content">
+          <div style="margin-bottom: 10px;">
+            <strong style="color: var(--slate-800);">📦 Avinash-cloud/start_tag</strong>
+            <ul style="list-style: none; margin-top: 6px; padding-left: 12px;">
+              <li style="margin-bottom: 4px; font-size: 13px; color: var(--slate-700);">
+                <span style="color: var(--slate-500); font-family: monospace;">[04:59 PM]</span>
+                <a href="https://github.com/Avinash-cloud/start_tag/commit/01583d8f239f7eb5bd7007bcd11d5d6dc031c498" target="_blank" style="color: var(--primary); text-decoration: none; font-family: monospace;">01583d8</a> &mdash; feat: add interactive live demo page, reviews system, email worker, and product components
+              </li>
+              <li style="margin-bottom: 4px; font-size: 13px; color: var(--slate-700);">
+                <span style="color: var(--slate-500); font-family: monospace;">[05:34 PM]</span>
+                <a href="https://github.com/Avinash-cloud/start_tag/commit/fcb45447832296835ec6b99d9f43ced1508db8a0" target="_blank" style="color: var(--primary); text-decoration: none; font-family: monospace;">fcb4544</a> &mdash; feat: add StarTagProduct component with interactive multi-pet configuration and media gallery
+              </li>
+            </ul>
+          </div>
+          <div style="margin-bottom: 10px;">
+            <strong style="color: var(--slate-800);">📦 Avinash-cloud/bla-tech-ui</strong>
+            <ul style="list-style: none; margin-top: 6px; padding-left: 12px;">
+              <li style="margin-bottom: 4px; font-size: 13px; color: var(--slate-700);">
+                <span style="color: var(--slate-500); font-family: monospace;">[06:07 PM]</span>
+                <a href="https://github.com/Avinash-cloud/bla-tech-ui/commit/dd7a3d651ed1dc854788c76b6251271ee40aa2a8" target="_blank" style="color: var(--primary); text-decoration: none; font-family: monospace;">dd7a3d6</a> &mdash; feat: add distributor pages, map integration, and application management API
+              </li>
+            </ul>
+          </div>
+        </div>
+      </details>
+      <details>
+        <summary>📅 2026-10-10 (Saturday) &mdash; 2 updates</summary>
+        <div class="details-content">
+          <div style="margin-bottom: 10px;">
+            <strong style="color: var(--slate-800);">📦 Avinash-cloud/rdgboos</strong>
+            <ul style="list-style: none; margin-top: 6px; padding-left: 12px;">
+              <li style="margin-bottom: 4px; font-size: 13px; color: var(--slate-700);">
+                <span style="color: var(--slate-500); font-family: monospace;">[03:23 PM]</span>
+                <a href="https://github.com/Avinash-cloud/rdgboos/commit/dd455e2a9e4548d377771563a2b1566040cceac0" target="_blank" style="color: var(--primary); text-decoration: none; font-family: monospace;">dd455e2</a> &mdash; feat: add dashboard views, components, and API integration for contacts, departments, and leads
+              </li>
+              <li style="margin-bottom: 4px; font-size: 13px; color: var(--slate-700);">
+                <span style="color: var(--slate-500); font-family: monospace;">[03:40 PM]</span>
+                <a href="https://github.com/Avinash-cloud/rdgboos/commit/9224ce810c545e60159c0c4ff2e0e6ea3791b202" target="_blank" style="color: var(--primary); text-decoration: none; font-family: monospace;">9224ce8</a> &mdash; feat: implement user management APIs, RBAC system, and NextAuth configuration
+              </li>
+            </ul>
+          </div>
+        </div>
+      </details>
+      <details>
+        <summary>📅 2026-10-12 (Monday) &mdash; 4 updates</summary>
+        <div class="details-content">
+          <div style="margin-bottom: 10px;">
+            <strong style="color: var(--slate-800);">📦 Avinash-cloud/Server_SGEPC</strong>
+            <ul style="list-style: none; margin-top: 6px; padding-left: 12px;">
+              <li style="margin-bottom: 4px; font-size: 13px; color: var(--slate-700);">
+                <span style="color: var(--slate-500); font-family: monospace;">[01:04 PM]</span>
+                <a href="https://github.com/Avinash-cloud/Server_SGEPC/commit/7dcced9431eb45c965c21bb50a0c7a2a4730ddd8" target="_blank" style="color: var(--primary); text-decoration: none; font-family: monospace;">7dcced9</a> &mdash; feat: initialize initial models, services, repositories, and controllers for admin backend
+              </li>
+              <li style="margin-bottom: 4px; font-size: 13px; color: var(--slate-700);">
+                <span style="color: var(--slate-500); font-family: monospace;">[01:05 PM]</span>
+                <a href="https://github.com/Avinash-cloud/Server_SGEPC/commit/a171bd6a2a91c0b22f08ec5fe91b658e72254a2d" target="_blank" style="color: var(--primary); text-decoration: none; font-family: monospace;">a171bd6</a> [merge] &mdash; Merge pull request #62 from Avinash-cloud/master
+              </li>
+            </ul>
+          </div>
+          <div style="margin-bottom: 10px;">
+            <strong style="color: var(--slate-800);">📦 Avinash-cloud/SGEPC_ADMIN_UI</strong>
+            <ul style="list-style: none; margin-top: 6px; padding-left: 12px;">
+              <li style="margin-bottom: 4px; font-size: 13px; color: var(--slate-700);">
+                <span style="color: var(--slate-500); font-family: monospace;">[01:09 PM]</span>
+                <a href="https://github.com/Avinash-cloud/SGEPC_ADMIN_UI/commit/e0df580bc32e0d9016fc6e911099299b445892a9" target="_blank" style="color: var(--primary); text-decoration: none; font-family: monospace;">e0df580</a> &mdash; feat: add master summary reporting API route and frontend page
+              </li>
+              <li style="margin-bottom: 4px; font-size: 13px; color: var(--slate-700);">
+                <span style="color: var(--slate-500); font-family: monospace;">[01:17 PM]</span>
+                <a href="https://github.com/Avinash-cloud/SGEPC_ADMIN_UI/commit/9b0b84108558a60421fe0c39f83955154856dd9d" target="_blank" style="color: var(--primary); text-decoration: none; font-family: monospace;">9b0b841</a> &mdash; feat: add item-wise statement report page with filters and server aggregation
+              </li>
+            </ul>
+          </div>
+        </div>
+      </details>
+      <details>
+        <summary>📅 2026-10-13 (Tuesday) &mdash; 8 updates</summary>
+        <div class="details-content">
+          <div style="margin-bottom: 10px;">
+            <strong style="color: var(--slate-800);">📦 Avinash-cloud/rdg-next</strong>
+            <ul style="list-style: none; margin-top: 6px; padding-left: 12px;">
+              <li style="margin-bottom: 4px; font-size: 13px; color: var(--slate-700);">
+                <span style="color: var(--slate-500); font-family: monospace;">[11:36 AM]</span>
+                <a href="https://github.com/Avinash-cloud/rdg-next/commit/44a37e1c615972fd15f6db3f3ff36a542869804b" target="_blank" style="color: var(--primary); text-decoration: none; font-family: monospace;">44a37e1</a> &mdash; feat: implement admin dashboard and backend API routes for managing leads, applications, and statuses
+              </li>
+              <li style="margin-bottom: 4px; font-size: 13px; color: var(--slate-700);">
+                <span style="color: var(--slate-500); font-family: monospace;">[11:51 AM]</span>
+                <a href="https://github.com/Avinash-cloud/rdg-next/commit/e9f84b06ab38ddb243e92f02685d353a3ec4167f" target="_blank" style="color: var(--primary); text-decoration: none; font-family: monospace;">e9f84b0</a> &mdash; feat: create admin leads page with management and filtering capabilities
+              </li>
+              <li style="margin-bottom: 4px; font-size: 13px; color: var(--slate-700);">
+                <span style="color: var(--slate-500); font-family: monospace;">[12:06 PM]</span>
+                <a href="https://github.com/Avinash-cloud/rdg-next/commit/ad560e55ff0ef982754a6532230248f640b6d06b" target="_blank" style="color: var(--primary); text-decoration: none; font-family: monospace;">ad560e5</a> &mdash; feat: add contact form component and thank you page implementation
+              </li>
+              <li style="margin-bottom: 4px; font-size: 13px; color: var(--slate-700);">
+                <span style="color: var(--slate-500); font-family: monospace;">[12:17 PM]</span>
+                <a href="https://github.com/Avinash-cloud/rdg-next/commit/b9717ad3c2ca9e8d1f654b359d713bed1c7c7ab9" target="_blank" style="color: var(--primary); text-decoration: none; font-family: monospace;">b9717ad</a> &mdash; feat: add AdminSidebar component with role-based navigation and live badge counters
+              </li>
+            </ul>
+          </div>
+          <div style="margin-bottom: 10px;">
+            <strong style="color: var(--slate-800);">📦 Avinash-cloud/rdgboos</strong>
+            <ul style="list-style: none; margin-top: 6px; padding-left: 12px;">
+              <li style="margin-bottom: 4px; font-size: 13px; color: var(--slate-700);">
+                <span style="color: var(--slate-500); font-family: monospace;">[12:48 PM]</span>
+                <a href="https://github.com/Avinash-cloud/rdgboos/commit/33bb29f56d78bc74ed188ff7c3f9837a5ac217b0" target="_blank" style="color: var(--primary); text-decoration: none; font-family: monospace;">33bb29f</a> &mdash; feat: add Meta portfolio integration, RBAC, and marketing management endpoints
+              </li>
+              <li style="margin-bottom: 4px; font-size: 13px; color: var(--slate-700);">
+                <span style="color: var(--slate-500); font-family: monospace;">[01:23 PM]</span>
+                <a href="https://github.com/Avinash-cloud/rdgboos/commit/3a119375aa05015c977409968eb87b20ea7e308f" target="_blank" style="color: var(--primary); text-decoration: none; font-family: monospace;">3a11937</a> &mdash; feat: implement department-based RBAC scoping, audit logging, and related API routes
+              </li>
+              <li style="margin-bottom: 4px; font-size: 13px; color: var(--slate-700);">
+                <span style="color: var(--slate-500); font-family: monospace;">[05:33 PM]</span>
+                <a href="https://github.com/Avinash-cloud/rdgboos/commit/c65ff593ac63da2a472ab1379bfb3642b54d8484" target="_blank" style="color: var(--primary); text-decoration: none; font-family: monospace;">c65ff59</a> &mdash; feat: add social media optimization (SMO) module with scheduling, analytics, and role management
+              </li>
+              <li style="margin-bottom: 4px; font-size: 13px; color: var(--slate-700);">
+                <span style="color: var(--slate-500); font-family: monospace;">[06:46 PM]</span>
+                <a href="https://github.com/Avinash-cloud/rdgboos/commit/db9b258d208f12993d96b0b0003ec26ab68b0417" target="_blank" style="color: var(--primary); text-decoration: none; font-family: monospace;">db9b258</a> &mdash; feat: add Meta Graph API integration service, database models, and dashboard routes for social media management
+              </li>
+            </ul>
+          </div>
+        </div>
+      </details>
+      <details>
+        <summary>📅 2026-10-14 (Wednesday) &mdash; 4 updates</summary>
+        <div class="details-content">
+          <div style="margin-bottom: 10px;">
+            <strong style="color: var(--slate-800);">📦 Avinash-cloud/rdgboos</strong>
+            <ul style="list-style: none; margin-top: 6px; padding-left: 12px;">
+              <li style="margin-bottom: 4px; font-size: 13px; color: var(--slate-700);">
+                <span style="color: var(--slate-500); font-family: monospace;">[10:19 AM]</span>
+                <a href="https://github.com/Avinash-cloud/rdgboos/commit/a47ca1b2a8c49377d39b3b395b1ab4dcf50810ae" target="_blank" style="color: var(--primary); text-decoration: none; font-family: monospace;">a47ca1b</a> &mdash; feat: add lead management API routes, UI components, and RBAC utilities
+              </li>
+              <li style="margin-bottom: 4px; font-size: 13px; color: var(--slate-700);">
+                <span style="color: var(--slate-500); font-family: monospace;">[01:30 PM]</span>
+                <a href="https://github.com/Avinash-cloud/rdgboos/commit/0a37349591948a1ab30aea0d7b7e4baa7a507c5f" target="_blank" style="color: var(--primary); text-decoration: none; font-family: monospace;">0a37349</a> &mdash; feat: add Google Sheet integration, IP whitelist login security, and user management features
+              </li>
+              <li style="margin-bottom: 4px; font-size: 13px; color: var(--slate-700);">
+                <span style="color: var(--slate-500); font-family: monospace;">[01:31 PM]</span>
+                <a href="https://github.com/Avinash-cloud/rdgboos/commit/3566dd797c3a7b9363299c271487fb9269e6c9ed" target="_blank" style="color: var(--primary); text-decoration: none; font-family: monospace;">3566dd7</a> [merge] &mdash; Merge pull request #1 from Avinash-cloud/work
+              </li>
+              <li style="margin-bottom: 4px; font-size: 13px; color: var(--slate-700);">
+                <span style="color: var(--slate-500); font-family: monospace;">[01:31 PM]</span>
+                <a href="https://github.com/Avinash-cloud/rdgboos/commit/87299596233a1f1f8e3b27f7e7aa7f8ea3edafa1" target="_blank" style="color: var(--primary); text-decoration: none; font-family: monospace;">8729959</a> [merge] &mdash; Merge pull request #2 from Avinash-cloud/master
+              </li>
+            </ul>
+          </div>
+        </div>
+      </details>
+      <details>
+        <summary>📅 2026-10-15 (Thursday) &mdash; 4 updates</summary>
+        <div class="details-content">
+          <div style="margin-bottom: 10px;">
+            <strong style="color: var(--slate-800);">📦 Avinash-cloud/rdgboos</strong>
+            <ul style="list-style: none; margin-top: 6px; padding-left: 12px;">
+              <li style="margin-bottom: 4px; font-size: 13px; color: var(--slate-700);">
+                <span style="color: var(--slate-500); font-family: monospace;">[10:58 AM]</span>
+                <a href="https://github.com/Avinash-cloud/rdgboos/commit/613c70acdda57d586d1dea7a2c035d825e38c54e" target="_blank" style="color: var(--primary); text-decoration: none; font-family: monospace;">613c70a</a> &mdash; feat: implement lead management features including bulk operations, Meta integration, and lead table UI
+              </li>
+              <li style="margin-bottom: 4px; font-size: 13px; color: var(--slate-700);">
+                <span style="color: var(--slate-500); font-family: monospace;">[10:59 AM]</span>
+                <a href="https://github.com/Avinash-cloud/rdgboos/commit/b9fb363e0cfdafd929b296a0539da1559764ec9b" target="_blank" style="color: var(--primary); text-decoration: none; font-family: monospace;">b9fb363</a> [merge] &mdash; Merge pull request #3 from Avinash-cloud/work
+              </li>
+            </ul>
+          </div>
+          <div style="margin-bottom: 10px;">
+            <strong style="color: var(--slate-800);">📦 Avinash-cloud/SGEPC_ADMIN_UI</strong>
+            <ul style="list-style: none; margin-top: 6px; padding-left: 12px;">
+              <li style="margin-bottom: 4px; font-size: 13px; color: var(--slate-700);">
+                <span style="color: var(--slate-500); font-family: monospace;">[05:37 PM]</span>
+                <a href="https://github.com/Avinash-cloud/SGEPC_ADMIN_UI/commit/c645b78a7957a25816d552d9738c88aee0dc6987" target="_blank" style="color: var(--primary); text-decoration: none; font-family: monospace;">c645b78</a> &mdash; feat: add master summary report page and api route with mongodb support
+              </li>
+            </ul>
+          </div>
+          <div style="margin-bottom: 10px;">
+            <strong style="color: var(--slate-800);">📦 Avinash-cloud/hanlays_admin</strong>
+            <ul style="list-style: none; margin-top: 6px; padding-left: 12px;">
+              <li style="margin-bottom: 4px; font-size: 13px; color: var(--slate-700);">
+                <span style="color: var(--slate-500); font-family: monospace;">[05:50 PM]</span>
+                <a href="https://github.com/Avinash-cloud/hanlays_admin/commit/8d9410f119cea012225376c63b40956ae47396ae" target="_blank" style="color: var(--primary); text-decoration: none; font-family: monospace;">8d9410f</a> [merge] &mdash; Merge pull request #70 from Avinash-cloud/work
+              </li>
+            </ul>
+          </div>
+        </div>
+      </details>
+    </div>
+
+    <div style="text-align: center; color: var(--slate-500); font-size: 12px; margin-top: 32px;" class="no-print">
+      Report generated by <strong>reportingscript.py</strong>
+    </div>
+  </div>
+</body>
+</html>
