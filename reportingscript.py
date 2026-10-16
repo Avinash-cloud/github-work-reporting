@@ -30,6 +30,32 @@ import urllib.error
 import urllib.parse
 
 
+import io
+
+# Ensure stdout/stderr/stdin are never None (essential for PyInstaller --windowed mode)
+class NullWriter(io.TextIOBase):
+    def write(self, s): return len(s) if s else 0
+    def flush(self): pass
+    def isatty(self): return False
+    def readable(self): return False
+    def writable(self): return True
+    def seekable(self): return False
+    @property
+    def encoding(self): return "utf-8"
+
+if sys.stdout is None:
+    sys.stdout = NullWriter()
+if sys.stderr is None:
+    sys.stderr = NullWriter()
+if sys.stdin is None:
+    sys.stdin = io.StringIO()
+if getattr(sys, "__stdout__", None) is None:
+    sys.__stdout__ = sys.stdout
+if getattr(sys, "__stderr__", None) is None:
+    sys.__stderr__ = sys.stderr
+if getattr(sys, "__stdin__", None) is None:
+    sys.__stdin__ = sys.stdin
+
 # Ensure UTF-8 output encoding for Windows command line / PowerShell
 try:
     if sys.stdout and hasattr(sys.stdout, "reconfigure"):
@@ -78,9 +104,13 @@ if sys.platform == "win32":
 
 
 def colorize(text: str, color_code: str) -> str:
-    if sys.stdout.isatty():
-        return f"{color_code}{text}{Style.RESET}"
+    try:
+        if sys.stdout and hasattr(sys.stdout, "isatty") and sys.stdout.isatty():
+            return f"{color_code}{text}{Style.RESET}"
+    except Exception:
+        pass
     return text
+
 
 
 # ---------------------------------------------------------------------------
@@ -2108,7 +2138,8 @@ def main():
     end_input = args.end_date
 
     # If neither start nor end is given on CLI and running interactively, prompt user
-    if not start_input and not end_input and sys.stdin.isatty():
+    stdin_is_atty = bool(sys.stdin and getattr(sys.stdin, "isatty", lambda: False)())
+    if not start_input and not end_input and stdin_is_atty:
         start_input, end_input = prompt_for_dates()
     elif not start_input:
         start_input = "7d"
@@ -2145,7 +2176,7 @@ def main():
         token = args.token or os.environ.get("GITHUB_TOKEN") or os.environ.get("GH_TOKEN")
 
         # In interactive terminal without token, prompt user
-        if not token and sys.stdin.isatty() and not args.author:
+        if not token and stdin_is_atty and not args.author:
             token = prompt_for_token()
 
         if not token:

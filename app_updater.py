@@ -7,6 +7,7 @@ and safely updates the executable on Windows.
 
 import os
 import sys
+import io
 import json
 import re
 import tempfile
@@ -14,6 +15,30 @@ import subprocess
 import urllib.request
 import urllib.error
 from typing import Optional, Tuple, Dict, Any, Callable
+
+# Ensure stdout/stderr/stdin are never None (essential for PyInstaller --windowed mode)
+class NullWriter(io.TextIOBase):
+    def write(self, s): return len(s) if s else 0
+    def flush(self): pass
+    def isatty(self): return False
+    def readable(self): return False
+    def writable(self): return True
+    def seekable(self): return False
+    @property
+    def encoding(self): return "utf-8"
+
+if sys.stdout is None:
+    sys.stdout = NullWriter()
+if sys.stderr is None:
+    sys.stderr = NullWriter()
+if sys.stdin is None:
+    sys.stdin = io.StringIO()
+if getattr(sys, "__stdout__", None) is None:
+    sys.__stdout__ = sys.stdout
+if getattr(sys, "__stderr__", None) is None:
+    sys.__stderr__ = sys.stderr
+if getattr(sys, "__stdin__", None) is None:
+    sys.__stdin__ = sys.stdin
 
 from app_config import APP_VERSION, DEFAULT_GITHUB_REPO
 
@@ -76,7 +101,9 @@ class UpdateManager:
                 return {
                     "has_update": False,
                     "latest_version": self.current_version,
-                    "error": f"No public releases found for repository '{self.repo}'."
+                    "error": None,
+                    "up_to_date": True,
+                    "message": "You are on the latest version. No updates are currently available."
                 }
             return {
                 "has_update": False,

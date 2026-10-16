@@ -28,6 +28,13 @@ def build():
     dist_dir = os.path.join(project_dir, "dist")
     build_dir = os.path.join(project_dir, "build")
 
+    # If GitHubWorkReporter.exe is currently running, terminate it so Windows doesn't lock the file
+    if sys.platform == "win32":
+        try:
+            subprocess.run(["taskkill", "/f", "/im", "GitHubWorkReporter.exe"], capture_output=True, check=False)
+        except Exception:
+            pass
+
     # Command arguments for PyInstaller
     cmd = [
         sys.executable,

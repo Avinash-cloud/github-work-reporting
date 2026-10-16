@@ -11,15 +11,42 @@ Features:
 
 import os
 import sys
+import io
 import threading
 import webbrowser
-from datetime import date, timedelta
+import calendar
+from datetime import date, datetime, timedelta
+from typing import Optional
 import tkinter as tk
 from tkinter import messagebox, filedialog
 import customtkinter as ctk
 
+# Ensure stdout/stderr/stdin are never None (essential for PyInstaller --windowed mode)
+class NullWriter(io.TextIOBase):
+    def write(self, s): return len(s) if s else 0
+    def flush(self): pass
+    def isatty(self): return False
+    def readable(self): return False
+    def writable(self): return True
+    def seekable(self): return False
+    @property
+    def encoding(self): return "utf-8"
+
+if sys.stdout is None:
+    sys.stdout = NullWriter()
+if sys.stderr is None:
+    sys.stderr = NullWriter()
+if sys.stdin is None:
+    sys.stdin = io.StringIO()
+if getattr(sys, "__stdout__", None) is None:
+    sys.__stdout__ = sys.stdout
+if getattr(sys, "__stderr__", None) is None:
+    sys.__stderr__ = sys.stderr
+if getattr(sys, "__stdin__", None) is None:
+    sys.__stdin__ = sys.stdin
+
 # Local module imports
-from app_config import ConfigManager, APP_VERSION, get_default_reports_dir
+from app_config import ConfigManager, APP_VERSION, DEFAULT_GITHUB_REPO, get_default_reports_dir
 from app_updater import UpdateManager
 from reportingscript import (
     GitHubClient,
@@ -33,6 +60,203 @@ from reportingscript import (
 # Configure default appearance
 ctk.set_appearance_mode("Dark")
 ctk.set_default_color_theme("blue")
+
+
+# ---------------------------------------------------------------------------
+# Calendar Date Picker Popup Widget
+# ---------------------------------------------------------------------------
+class CTkDatePicker(ctk.CTkToplevel):
+    """
+    Interactive Dark-Themed Calendar Date Picker modal dialog.
+    Allows easy month/year navigation, quick 'Today' jump, and click-to-select.
+    """
+    def __init__(self, parent, target_entry: ctk.CTkEntry, initial_date: Optional[date] = None, title: str = "Select Date"):
+        super().__init__(parent)
+        self.target_entry = target_entry
+        self.title(title)
+        self.geometry("340x380")
+        self.resizable(False, False)
+        self.transient(parent)
+
+        sel_date = None
+        if target_entry:
+            val = target_entry.get().strip()
+            try:
+                sel_date = datetime.strptime(val, "%Y-%m-%d").date()
+            except Exception:
+                pass
+
+        self.selected_date = sel_date or initial_date or date.today()
+        self.today = date.today()
+        self.view_year = self.selected_date.year
+        self.view_month = self.selected_date.month
+
+        self._position_popup(target_entry)
+        self._build_ui()
+
+        self.grab_set()
+        self.focus_set()
+        self.bind("<Escape>", lambda e: self.destroy())
+
+    def _position_popup(self, widget):
+        self.update_idletasks()
+        try:
+            if widget:
+                widget.update_idletasks()
+                x = widget.winfo_rootx()
+                y = widget.winfo_rooty() + widget.winfo_height() + 6
+                screen_w = self.winfo_screenwidth()
+                screen_h = self.winfo_screenheight()
+                w, h = 340, 380
+                if x + w > screen_w:
+                    x = max(10, screen_w - w - 20)
+                if y + h > screen_h:
+                    y = max(10, widget.winfo_rooty() - h - 10)
+                self.geometry(f"{w}x{h}+{x}+{y}")
+        except Exception:
+            self.geometry("340x380")
+
+    def _build_ui(self):
+        # Header navigation: Prev Year, Prev Month, Month & Year, Next Month, Next Year
+        header_frame = ctk.CTkFrame(self, fg_color="transparent")
+        header_frame.pack(fill="x", padx=14, pady=(12, 6))
+
+        ctk.CTkButton(
+            header_frame, text="«", width=28, height=28, font=ctk.CTkFont(size=14, weight="bold"),
+            fg_color="#334155", hover_color="#475569", command=self._prev_year
+        ).pack(side="left", padx=2)
+
+        ctk.CTkButton(
+            header_frame, text="‹", width=28, height=28, font=ctk.CTkFont(size=14, weight="bold"),
+            fg_color="#334155", hover_color="#475569", command=self._prev_month
+        ).pack(side="left", padx=2)
+
+        self.lbl_month_year = ctk.CTkLabel(
+            header_frame,
+            text=f"{calendar.month_name[self.view_month]} {self.view_year}",
+            font=ctk.CTkFont(size=15, weight="bold"),
+            text_color="#f8fafc"
+        )
+        self.lbl_month_year.pack(side="left", expand=True)
+
+        ctk.CTkButton(
+            header_frame, text="›", width=28, height=28, font=ctk.CTkFont(size=14, weight="bold"),
+            fg_color="#334155", hover_color="#475569", command=self._next_month
+        ).pack(side="right", padx=2)
+
+        ctk.CTkButton(
+            header_frame, text="»", width=28, height=28, font=ctk.CTkFont(size=14, weight="bold"),
+            fg_color="#334155", hover_color="#475569", command=self._next_year
+        ).pack(side="right", padx=2)
+
+        # Days of week header
+        weekdays_frame = ctk.CTkFrame(self, fg_color="transparent")
+        weekdays_frame.pack(fill="x", padx=14, pady=(4, 4))
+        for d in ["Mo", "Tu", "We", "Th", "Fr", "Sa", "Su"]:
+            lbl = ctk.CTkLabel(
+                weekdays_frame, text=d, font=ctk.CTkFont(size=11, weight="bold"),
+                text_color="#94a3b8", width=38
+            )
+            lbl.pack(side="left", expand=True)
+
+        # Calendar days grid
+        self.days_frame = ctk.CTkFrame(self, fg_color="#1e293b", corner_radius=6)
+        self.days_frame.pack(fill="both", expand=True, padx=14, pady=4)
+
+        self._render_days()
+
+        # Bottom Action Bar
+        bottom_frame = ctk.CTkFrame(self, fg_color="transparent")
+        bottom_frame.pack(fill="x", padx=14, pady=(6, 12))
+
+        ctk.CTkButton(
+            bottom_frame, text="Today", width=70, height=28, font=ctk.CTkFont(size=11),
+            fg_color="#334155", hover_color="#475569", command=self._select_today
+        ).pack(side="left")
+
+        ctk.CTkButton(
+            bottom_frame, text="Close", width=70, height=28, font=ctk.CTkFont(size=11),
+            fg_color="#475569", hover_color="#64748b", command=self.destroy
+        ).pack(side="right")
+
+    def _render_days(self):
+        for w in self.days_frame.winfo_children():
+            w.destroy()
+
+        self.lbl_month_year.configure(text=f"{calendar.month_name[self.view_month]} {self.view_year}")
+        weeks = calendar.monthcalendar(self.view_year, self.view_month)
+
+        for r, week in enumerate(weeks):
+            for c, day in enumerate(week):
+                if day == 0:
+                    lbl = ctk.CTkLabel(self.days_frame, text="", width=38, height=30)
+                    lbl.grid(row=r, column=c, padx=2, pady=2)
+                else:
+                    is_selected = (
+                        self.selected_date and
+                        self.selected_date.year == self.view_year and
+                        self.selected_date.month == self.view_month and
+                        self.selected_date.day == day
+                    )
+                    is_today = (
+                        self.today.year == self.view_year and
+                        self.today.month == self.view_month and
+                        self.today.day == day
+                    )
+
+                    fg = "#2563eb" if is_selected else ("#0f766e" if is_today else "#0f172a")
+                    hover = "#1d4ed8" if is_selected else "#334155"
+                    border_w = 1 if is_today and not is_selected else 0
+                    border_c = "#38bdf8" if is_today and not is_selected else None
+
+                    btn = ctk.CTkButton(
+                        self.days_frame,
+                        text=str(day),
+                        width=38,
+                        height=30,
+                        font=ctk.CTkFont(size=12, weight="bold" if (is_selected or is_today) else "normal"),
+                        fg_color=fg,
+                        hover_color=hover,
+                        border_width=border_w,
+                        border_color=border_c,
+                        corner_radius=4,
+                        command=lambda d=day: self._select_day(d)
+                    )
+                    btn.grid(row=r, column=c, padx=2, pady=2)
+
+    def _prev_month(self):
+        if self.view_month == 1:
+            self.view_month = 12
+            self.view_year -= 1
+        else:
+            self.view_month -= 1
+        self._render_days()
+
+    def _next_month(self):
+        if self.view_month == 12:
+            self.view_month = 1
+            self.view_year += 1
+        else:
+            self.view_month += 1
+        self._render_days()
+
+    def _prev_year(self):
+        self.view_year -= 1
+        self._render_days()
+
+    def _next_year(self):
+        self.view_year += 1
+        self._render_days()
+
+    def _select_day(self, day: int):
+        chosen = date(self.view_year, self.view_month, day)
+        if self.target_entry:
+            self.target_entry.delete(0, "end")
+            self.target_entry.insert(0, chosen.strftime("%Y-%m-%d"))
+        self.destroy()
+
+    def _select_today(self):
+        self._select_day(self.today.day)
 
 
 class WorkReporterApp(ctk.CTk):
@@ -368,15 +592,39 @@ class WorkReporterApp(ctk.CTk):
         date_row = ctk.CTkFrame(date_card, fg_color="transparent")
         date_row.pack(fill="x", padx=16, pady=(0, 10))
 
-        ctk.CTkLabel(date_row, text="From:", font=ctk.CTkFont(size=13)).pack(side="left", padx=(0, 6))
-        self.start_date_entry = ctk.CTkEntry(date_row, width=130, height=32, font=ctk.CTkFont(size=13))
+        ctk.CTkLabel(date_row, text="From:", font=ctk.CTkFont(size=13, weight="bold")).pack(side="left", padx=(0, 6))
+        self.start_date_entry = ctk.CTkEntry(date_row, width=120, height=32, font=ctk.CTkFont(size=13))
         self.start_date_entry.insert(0, (date.today() - timedelta(days=7)).strftime("%Y-%m-%d"))
-        self.start_date_entry.pack(side="left", padx=(0, 16))
+        self.start_date_entry.pack(side="left", padx=(0, 4))
+        self.btn_cal_start = ctk.CTkButton(
+            date_row,
+            text="📅",
+            width=36,
+            height=32,
+            font=ctk.CTkFont(size=14),
+            fg_color="#334155",
+            hover_color="#475569",
+            command=lambda: self._open_date_picker(self.start_date_entry, "Select Start Date")
+        )
+        self.btn_cal_start.pack(side="left", padx=(0, 20))
+        self.start_date_entry.bind("<Double-Button-1>", lambda e: self._open_date_picker(self.start_date_entry, "Select Start Date"))
 
-        ctk.CTkLabel(date_row, text="To:", font=ctk.CTkFont(size=13)).pack(side="left", padx=(0, 6))
-        self.end_date_entry = ctk.CTkEntry(date_row, width=130, height=32, font=ctk.CTkFont(size=13))
+        ctk.CTkLabel(date_row, text="To:", font=ctk.CTkFont(size=13, weight="bold")).pack(side="left", padx=(0, 6))
+        self.end_date_entry = ctk.CTkEntry(date_row, width=120, height=32, font=ctk.CTkFont(size=13))
         self.end_date_entry.insert(0, date.today().strftime("%Y-%m-%d"))
-        self.end_date_entry.pack(side="left", padx=(0, 20))
+        self.end_date_entry.pack(side="left", padx=(0, 4))
+        self.btn_cal_end = ctk.CTkButton(
+            date_row,
+            text="📅",
+            width=36,
+            height=32,
+            font=ctk.CTkFont(size=14),
+            fg_color="#334155",
+            hover_color="#475569",
+            command=lambda: self._open_date_picker(self.end_date_entry, "Select End Date")
+        )
+        self.btn_cal_end.pack(side="left", padx=(0, 20))
+        self.end_date_entry.bind("<Double-Button-1>", lambda e: self._open_date_picker(self.end_date_entry, "Select End Date"))
 
         # Quick Preset Buttons
         presets_frame = ctk.CTkFrame(date_card, fg_color="transparent")
@@ -465,7 +713,13 @@ class WorkReporterApp(ctk.CTk):
         )
         self.lbl_results_placeholder.pack(pady=30)
 
-    # Date Presets
+    # Date Picker & Presets
+    def _open_date_picker(self, target_entry: ctk.CTkEntry, title: str = "Select Date"):
+        try:
+            CTkDatePicker(self, target_entry=target_entry, title=title)
+        except Exception as e:
+            messagebox.showerror("Date Picker", str(e))
+
     def _set_preset_today(self):
         t = date.today().strftime("%Y-%m-%d")
         self.start_date_entry.delete(0, "end"); self.start_date_entry.insert(0, t)
@@ -697,26 +951,41 @@ class WorkReporterApp(ctk.CTk):
         card = ctk.CTkFrame(parent, corner_radius=8, fg_color="#1e293b")
         card.pack(fill="x", padx=16, pady=16)
 
-        ctk.CTkLabel(card, text="Application Version & Auto-Update", font=ctk.CTkFont(size=16, weight="bold"), text_color="#f8fafc").pack(anchor="w", padx=16, pady=(14, 4))
-        ctk.CTkLabel(card, text=f"Currently running version: v{APP_VERSION}", font=ctk.CTkFont(size=13), text_color="#94a3b8").pack(anchor="w", padx=16, pady=(0, 12))
+        ctk.CTkLabel(
+            card,
+            text="Application Version & Auto-Update",
+            font=ctk.CTkFont(size=16, weight="bold"),
+            text_color="#f8fafc"
+        ).pack(anchor="w", padx=20, pady=(16, 4))
 
-        # Repo selector
-        repo_row = ctk.CTkFrame(card, fg_color="transparent")
-        repo_row.pack(fill="x", padx=16, pady=(0, 14))
+        ctk.CTkLabel(
+            card,
+            text=f"Currently running version: v{APP_VERSION}",
+            font=ctk.CTkFont(size=13),
+            text_color="#94a3b8"
+        ).pack(anchor="w", padx=20, pady=(0, 14))
 
-        ctk.CTkLabel(repo_row, text="Update Repository:", font=ctk.CTkFont(size=12, weight="bold")).pack(side="left", padx=(0, 8))
-        self.update_repo_entry = ctk.CTkEntry(repo_row, width=300, height=32, font=ctk.CTkFont(size=12))
-        self.update_repo_entry.insert(0, self.config_mgr.get("github_update_repo"))
-        self.update_repo_entry.pack(side="left", padx=(0, 12))
+        action_row = ctk.CTkFrame(card, fg_color="transparent")
+        action_row.pack(fill="x", padx=20, pady=(0, 16))
 
         self.btn_check_update = ctk.CTkButton(
-            repo_row,
+            action_row,
             text="🔍 Check for Updates",
-            height=32,
-            font=ctk.CTkFont(size=12, weight="bold"),
+            height=36,
+            font=ctk.CTkFont(size=13, weight="bold"),
+            fg_color="#2563eb",
+            hover_color="#1d4ed8",
             command=self.check_for_updates
         )
-        self.btn_check_update.pack(side="left")
+        self.btn_check_update.pack(side="left", padx=(0, 14))
+
+        self.lbl_update_spinner = ctk.CTkLabel(
+            action_row,
+            text="",
+            font=ctk.CTkFont(size=12),
+            text_color="#38bdf8"
+        )
+        self.lbl_update_spinner.pack(side="left")
 
         # Update Display Box
         self.update_display_card = ctk.CTkFrame(parent, corner_radius=8)
@@ -724,53 +993,60 @@ class WorkReporterApp(ctk.CTk):
 
         self.lbl_update_status = ctk.CTkLabel(
             self.update_display_card,
-            text="Click 'Check for Updates' to query the public GitHub repository for new releases.",
+            text="Click 'Check for Updates' to verify if a new release is available.",
             font=ctk.CTkFont(size=13),
             text_color="#64748b"
         )
         self.lbl_update_status.pack(pady=40)
 
     def check_for_updates(self):
-        repo_name = self.update_repo_entry.get().strip()
-        if not repo_name:
-            messagebox.showwarning("Repository Required", "Please specify a GitHub repository name (e.g. owner/repo).")
-            return
-
-        self.config_mgr.set("github_update_repo", repo_name)
-        self.btn_check_update.configure(state="disabled", text="Checking...")
+        self.btn_check_update.configure(state="disabled", text="Checking for updates...")
+        self.lbl_update_spinner.configure(text="Checking GitHub...")
 
         token = self.token_entry.get().strip() or self.config_mgr.get("token")
-        threading.Thread(target=self._run_check_updates, args=(repo_name, token), daemon=True).start()
+        threading.Thread(target=self._run_check_updates, args=(token,), daemon=True).start()
 
-    def _run_check_updates(self, repo_name: str, token: str):
-        updater = UpdateManager(repo_full_name=repo_name, current_version=APP_VERSION, token=token)
+    def _run_check_updates(self, token: str):
+        updater = UpdateManager(repo_full_name=DEFAULT_GITHUB_REPO, current_version=APP_VERSION, token=token)
         res = updater.check_for_updates()
         self.after(0, self._on_update_result, res, updater)
 
     def _on_update_result(self, res: dict, updater: UpdateManager):
         self.btn_check_update.configure(state="normal", text="🔍 Check for Updates")
+        self.lbl_update_spinner.configure(text="")
 
         for w in self.update_display_card.winfo_children():
             w.pack_forget()
 
         if res.get("error"):
+            box = ctk.CTkFrame(self.update_display_card, fg_color="transparent")
+            box.pack(pady=40)
+            ctk.CTkLabel(box, text="⚠️", font=ctk.CTkFont(size=32)).pack(pady=(0, 8))
             ctk.CTkLabel(
-                self.update_display_card,
-                text=f"Check Update Result:\n{res['error']}",
+                box,
+                text=f"Unable to check for updates:\n{res['error']}\n\nPlease check your internet connection.",
                 font=ctk.CTkFont(size=13),
                 text_color="#f87171",
                 justify="center"
-            ).pack(pady=40)
+            ).pack()
             return
 
         if not res.get("has_update"):
+            box = ctk.CTkFrame(self.update_display_card, fg_color="transparent")
+            box.pack(pady=40)
+            ctk.CTkLabel(box, text="✔", font=ctk.CTkFont(size=36), text_color="#34d399").pack(pady=(0, 8))
             ctk.CTkLabel(
-                self.update_display_card,
-                text=f"✔ You are on the latest version!\nCurrent: v{APP_VERSION} (Latest: {res.get('latest_version')})",
-                font=ctk.CTkFont(size=15, weight="bold"),
-                text_color="#34d399",
-                justify="center"
-            ).pack(pady=40)
+                box,
+                text=f"You are running the latest version! (v{APP_VERSION})",
+                font=ctk.CTkFont(size=16, weight="bold"),
+                text_color="#34d399"
+            ).pack(pady=(0, 6))
+            ctk.CTkLabel(
+                box,
+                text="No new updates are currently available. Your application is up to date.",
+                font=ctk.CTkFont(size=12),
+                text_color="#94a3b8"
+            ).pack()
             return
 
         # An update is available!
