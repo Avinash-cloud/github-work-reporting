@@ -263,7 +263,7 @@ class WorkReporterApp(ctk.CTk):
     def __init__(self):
         super().__init__()
 
-        self.title(f"Reporting App  v{APP_VERSION}")
+        self.title(f"Reporting App by Avi  v{APP_VERSION}")
         self.geometry("980x720")
         self.minsize(860, 600)
 
